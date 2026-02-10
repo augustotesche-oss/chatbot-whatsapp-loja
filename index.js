@@ -2,6 +2,10 @@ const express = require("express");
 const app = express();
 
 app.use(express.json());
+app.get("/", (req, res) => {
+  res.send("✅ Chatbot da loja está ONLINE!");
+});
+
 
 const PORT = process.env.PORT || 3000;
 
@@ -169,4 +173,5 @@ app.post("/mensagem", (req, res) => {
 app.listen(PORT, () => {
   console.log("✅ Servidor do chatbot está funcionando!");
 });
+
 
