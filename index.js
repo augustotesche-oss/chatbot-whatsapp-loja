@@ -1,4 +1,5 @@
 const express = require("express");
+const axios = require("axios");
 const app = express();
 
 app.use(express.json());
@@ -185,11 +186,44 @@ app.get("/webhook", (req, res) => {
   }
 });
 
-app.post("/webhook", (req, res) => {
-  console.log("📩 Mensagem recebida:");
-  console.log(JSON.stringify(req.body, null, 2));
-  res.sendStatus(200);
+app.post("/webhook", async (req, res) => {
+  try {
+    const body = req.body;
+
+    const message =
+      body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+
+    if (message) {
+      const from = message.from;
+      const texto = message.text?.body || "";
+
+      console.log("📩 Texto recebido:", texto);
+
+      await axios.post(
+        `https://graph.facebook.com/v19.0/${process.env.PHONE_NUMBER_ID}/messages`,
+        {
+          messaging_product: "whatsapp",
+          to: from,
+          text: {
+            body: "Recebi sua mensagem 👍"
+          }
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
+    res.sendStatus(200);
+  } catch (erro) {
+    console.log("❌ ERRO:", erro.response?.data || erro.message);
+    res.sendStatus(500);
+  }
 });
+
 
 /* =========================
    SERVIDOR
